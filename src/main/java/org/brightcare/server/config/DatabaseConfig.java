@@ -21,7 +21,7 @@ public final class DatabaseConfig {
 
     private static final Logger log = LoggerFactory.getLogger(DatabaseConfig.class);
 
-    private static final String PROPERTIES_FILE = "application.properties";
+    private static final String PROPERTIES_FILE = "application.dev.properties";
 
     private static volatile HikariDataSource dataSource;
     private static final Object LOCK = new Object();

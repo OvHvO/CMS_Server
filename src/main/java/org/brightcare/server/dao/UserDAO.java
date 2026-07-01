@@ -26,13 +26,21 @@ public class UserDAO {
             "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?) RETURNING id";
 
     private static final String FIND_BY_USERNAME =
-            "SELECT id, username, password_hash, role, created_at FROM users WHERE username = ?";
+            "SELECT id, username, password_hash, role, auth_secretKey, auth_enabled, created_at FROM users WHERE username = ?";
 
     private static final String FIND_BY_ID =
-            "SELECT id, username, password_hash, role, created_at FROM users WHERE id = ?";
+            "SELECT id, username, password_hash, role, auth_secretKey, auth_enabled, created_at FROM users WHERE id = ?";
 
     private static final String EXISTS_BY_USERNAME =
             "SELECT 1 FROM users WHERE username = ?";
+
+    private static final String UPDATE_AUTH_ENABLED = 
+              "UPDATE users SET auth_enabled = ? WHERE id = ?";
+
+    private static final String UPDATE_AUTH_SECRET =
+                "UPDATE users SET auth_secretKey = ?, auth_enabled = FALSE WHERE id = ?";
+    
+
 
     // -------------------------------------------------------------------------
     // Public methods
@@ -97,6 +105,43 @@ public class UserDAO {
         }
     }
 
+
+    /**
+     * Update the authenticator enabled state for a user. This is called after the user successfully logs in with the authenticator code.
+     * @param userId
+     * @param state
+     * @throws SQLException
+     */
+    public void updateAuthEnabled(UUID userId, boolean state) throws SQLException {
+        try (var ps = connection.prepareStatement(UPDATE_AUTH_ENABLED)) {
+            ps.setBoolean(1, state);
+            ps.setObject(2, userId);
+            int rowsUpdated = ps.executeUpdate();
+            if (rowsUpdated == 0) {
+                throw new SQLException("No user found with ID: " + userId);
+            }
+        }
+    }
+
+
+    /**
+     * Save the Google Authenticator secret for a user. This is only called after the user's password has been verified.
+     * The secret is stored in the database, and the authenticator is disabled until the user successfully logs in with the authenticator code.
+     * @param userId
+     * @param secret
+     * @throws SQLException
+     */
+    public void saveAuthenticatorSecret(UUID userId, String secret) throws SQLException {
+        try (var ps = connection.prepareStatement(UPDATE_AUTH_SECRET)) {
+            ps.setString(1, secret);
+            ps.setObject(2, userId);
+            int rowsUpdated = ps.executeUpdate();
+            if (rowsUpdated == 0) {
+                throw new SQLException("No user found with ID: " + userId);
+            }
+        }
+    }
+
     // -------------------------------------------------------------------------
     // Row mapping
     // -------------------------------------------------------------------------
@@ -107,6 +152,8 @@ public class UserDAO {
                 rs.getString("username"),
                 rs.getString("password_hash"),
                 Role.fromString(rs.getString("role")),
+                rs.getString("auth_secretKey"),
+                rs.getBoolean("auth_enabled"),
                 rs.getTimestamp("created_at").toInstant().atZone(java.time.ZoneOffset.UTC)
         );
     }
@@ -124,6 +171,8 @@ public class UserDAO {
             String username,
             String passwordHash,
             Role role,
+            String authSecret,
+            boolean authenticatorEnabled,
             java.time.ZonedDateTime createdAt
     ) {}
 }
