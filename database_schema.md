@@ -8,6 +8,8 @@ CREATE TABLE users (
     username VARCHAR(50) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL, 
     role VARCHAR(20) NOT NULL, -- Controlled at business logic level: 'RECEPTIONIST', 'DOCTOR', 'PATIENT', 'ADMIN'
+    auth_secretKey VARCHAR(100), -- FOR GOOGLE AUTHENTICATOR; created on first QR setup
+    auth_enabled BOOLEAN DEFAULT FALSE NOT NULL, -- TRUE only after first successful authenticator code verification
     created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
 );
