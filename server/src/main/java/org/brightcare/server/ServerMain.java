@@ -1,7 +1,9 @@
 package org.brightcare.server;
 
+import org.brightcare.common.AuthenticationService;
 import org.brightcare.common.ClinicService;
 import org.brightcare.server.config.DatabaseConfig;
+import org.brightcare.server.impl.AuthenticationServiceImpl;
 import org.brightcare.server.impl.ClinicServiceImpl;
 import org.brightcare.util.RmiUtil;
 import org.slf4j.Logger;
@@ -40,6 +42,7 @@ public final class ServerMain {
         log.info("============================================================");
 
         ClinicService service = null;
+        AuthenticationService authService = null;
 
         try {
             // 1. Pre-warm the connection pool
@@ -50,9 +53,11 @@ public final class ServerMain {
             // 2. Create the remote service implementation
             log.info("Creating ClinicService remote object...");
             service = new ClinicServiceImpl();
+            authService = new AuthenticationServiceImpl();
 
             // 3. Export and bind to RMI registry
             RmiUtil.exportAndBind(SERVICE_NAME, service, RMI_PORT);
+            RmiUtil.exportAndBind("AuthenticationService", authService, RMI_PORT);
 
             // 4. Register JVM shutdown hook for graceful cleanup
             final ClinicService finalService = service;
@@ -62,6 +67,12 @@ public final class ServerMain {
                 DatabaseConfig.shutdown();
                 log.info("Server stopped");
             }, "shutdown-hook"));
+
+            final AuthenticationService authFinal = authService;
+            Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+                log.info("Shutdown hook triggered — cleaning up AuthenticationService...");
+                RmiUtil.unexport(authFinal, true);
+            }, "shutdown-hook-auth"));
 
             log.info("============================================================");
             log.info("  Server is ready.");
