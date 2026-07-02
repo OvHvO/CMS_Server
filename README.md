@@ -52,6 +52,10 @@ src/main/java/org/brightcare/
     ├── application.properties       # DB config
     └── logback.xml                  # Logging config
 ```
+## Configuration Setup Note
+Note: This is for integration use Both Frontend and Backend integrate
+Please refer to the [configuration file](Getting_Start.md)
+
 
 ## Database Setup
 

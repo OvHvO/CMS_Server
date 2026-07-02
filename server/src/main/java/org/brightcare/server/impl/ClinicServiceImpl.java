@@ -30,7 +30,7 @@ import java.util.stream.Collectors;
  * thread. The DAOs are local to each method call, so no shared mutable state
  * exists between threads. HikariCP handles concurrent connection access.
  */
-public class ClinicServiceImpl extends UnicastRemoteObject implements ClinicService {
+public class ClinicServiceImpl implements ClinicService {
 
     private static final long serialVersionUID = 1L;
     private static final Logger log = LoggerFactory.getLogger(ClinicServiceImpl.class);
@@ -43,8 +43,8 @@ public class ClinicServiceImpl extends UnicastRemoteObject implements ClinicServ
     // PostgreSQL unique-constraint violation
     private static final String SQLSTATE_UNIQUE_VIOLATION = "23505";
 
-    public ClinicServiceImpl() throws RemoteException {
-        super();
+    public ClinicServiceImpl() {
+        // Default constructor
     }
 
     // =========================================================================

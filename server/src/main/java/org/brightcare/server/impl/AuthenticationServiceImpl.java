@@ -56,7 +56,7 @@ import org.slf4j.LoggerFactory;
  * @see SessionDAO
  * @see DatabaseConfig
  */
-public class AuthenticationServiceImpl extends UnicastRemoteObject implements AuthenticationService {
+public class AuthenticationServiceImpl implements AuthenticationService {
 
     private static final Logger logger = LoggerFactory.getLogger(AuthenticationServiceImpl.class);
     private static final String ISSUER = "Clinic Management System";
@@ -64,8 +64,8 @@ public class AuthenticationServiceImpl extends UnicastRemoteObject implements Au
     private final GoogleAuthenticator googleAuthenticator = new GoogleAuthenticator();
     private final Set<UUID> activeSessions = ConcurrentHashMap.newKeySet();
 
-    public AuthenticationServiceImpl() throws RemoteException {
-        super();
+    public AuthenticationServiceImpl() {
+        // Default constructor
     }
 
     /**

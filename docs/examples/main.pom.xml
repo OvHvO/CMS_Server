@@ -1,3 +1,7 @@
+
+<!-- PLEASE COPY THIS FILE TO YOUR PROJECT ROOT DIRECTORY AND RENAME IT TO pom.xml -->
+<!-- NOTE: This is a sample pom.xml file for a multi-module Maven project. You should customize it according to your project's needs. -->
+
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
@@ -11,9 +15,9 @@
     <packaging>pom</packaging>
 
     <modules>
-        <module>brightcare-common</module>
-        <module>client</module>
-        <module>brightcare-server</module>
+        <module>CMS_Server/common</module>
+        <module>Clinic_Management_System/client</module>
+        <module>CMS_Server/server</module>
     </modules>
 
     <properties>
