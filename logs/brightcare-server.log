@@ -1,0 +1,126 @@
+2026-06-29 22:55:06.277 [main] INFO  org.brightcare.server.ServerMain - ============================================================
+2026-06-29 22:55:06.280 [main] INFO  org.brightcare.server.ServerMain -   BrightCare Medical Centre — RMI Server
+2026-06-29 22:55:06.281 [main] INFO  org.brightcare.server.ServerMain -   Starting up...
+2026-06-29 22:55:06.281 [main] INFO  org.brightcare.server.ServerMain - ============================================================
+2026-06-29 22:55:06.281 [main] INFO  org.brightcare.server.ServerMain - Initialising database connection pool...
+2026-06-29 22:55:06.286 [main] INFO  o.b.server.config.DatabaseConfig - HikariCP pool initialised — jdbcUrl=${DB_URL}jdbc:postgresql://localhost:5432/cms, maxPoolSize=10
+2026-06-29 22:55:06.299 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-06-29 22:55:06.317 [main] ERROR org.brightcare.server.ServerMain - Fatal error starting server
+java.lang.RuntimeException: Failed to get driver instance for jdbcUrl=${DB_URL}jdbc:postgresql://localhost:5432/cms
+	at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:113)
+	at com.zaxxer.hikari.pool.PoolBase.initializeDataSource(PoolBase.java:327)
+	at com.zaxxer.hikari.pool.PoolBase.<init>(PoolBase.java:113)
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:91)
+	at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:80)
+	at org.brightcare.server.config.DatabaseConfig.initDataSource(DatabaseConfig.java:116)
+	at org.brightcare.server.config.DatabaseConfig.getDataSource(DatabaseConfig.java:44)
+	at org.brightcare.server.ServerMain.main(ServerMain.java:47)
+Caused by: java.sql.SQLException: No suitable driver
+	at java.sql/java.sql.DriverManager.getDriver(DriverManager.java:300)
+	at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:105)
+	... 7 common frames omitted
+2026-06-29 23:04:36.263 [main] INFO  org.brightcare.server.ServerMain - ============================================================
+2026-06-29 23:04:36.264 [main] INFO  org.brightcare.server.ServerMain -   BrightCare Medical Centre — RMI Server
+2026-06-29 23:04:36.264 [main] INFO  org.brightcare.server.ServerMain -   Starting up...
+2026-06-29 23:04:36.264 [main] INFO  org.brightcare.server.ServerMain - ============================================================
+2026-06-29 23:04:36.264 [main] INFO  org.brightcare.server.ServerMain - Initialising database connection pool...
+2026-06-29 23:04:36.268 [main] INFO  o.b.server.config.DatabaseConfig - HikariCP pool initialised — jdbcUrl=${DB_URL}jdbc:postgresql://localhost:5432/cms, maxPoolSize=10
+2026-06-29 23:04:36.278 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-06-29 23:04:36.286 [main] ERROR org.brightcare.server.ServerMain - Fatal error starting server
+java.lang.RuntimeException: Failed to get driver instance for jdbcUrl=${DB_URL}jdbc:postgresql://localhost:5432/cms
+	at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:113)
+	at com.zaxxer.hikari.pool.PoolBase.initializeDataSource(PoolBase.java:327)
+	at com.zaxxer.hikari.pool.PoolBase.<init>(PoolBase.java:113)
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:91)
+	at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:80)
+	at org.brightcare.server.config.DatabaseConfig.initDataSource(DatabaseConfig.java:116)
+	at org.brightcare.server.config.DatabaseConfig.getDataSource(DatabaseConfig.java:44)
+	at org.brightcare.server.ServerMain.main(ServerMain.java:47)
+Caused by: java.sql.SQLException: No suitable driver
+	at java.sql/java.sql.DriverManager.getDriver(DriverManager.java:300)
+	at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:105)
+	... 7 common frames omitted
+2026-06-29 23:05:09.371 [main] INFO  org.brightcare.server.ServerMain - ============================================================
+2026-06-29 23:05:09.372 [main] INFO  org.brightcare.server.ServerMain -   BrightCare Medical Centre — RMI Server
+2026-06-29 23:05:09.373 [main] INFO  org.brightcare.server.ServerMain -   Starting up...
+2026-06-29 23:05:09.373 [main] INFO  org.brightcare.server.ServerMain - ============================================================
+2026-06-29 23:05:09.373 [main] INFO  org.brightcare.server.ServerMain - Initialising database connection pool...
+2026-06-29 23:05:09.376 [main] INFO  o.b.server.config.DatabaseConfig - HikariCP pool initialised — jdbcUrl=${DB_URL}jdbc:postgresql://localhost:5432/cms, maxPoolSize=10
+2026-06-29 23:05:09.389 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-06-29 23:05:09.397 [main] ERROR org.brightcare.server.ServerMain - Fatal error starting server
+java.lang.RuntimeException: Failed to get driver instance for jdbcUrl=${DB_URL}jdbc:postgresql://localhost:5432/cms
+	at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:113)
+	at com.zaxxer.hikari.pool.PoolBase.initializeDataSource(PoolBase.java:327)
+	at com.zaxxer.hikari.pool.PoolBase.<init>(PoolBase.java:113)
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:91)
+	at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:80)
+	at org.brightcare.server.config.DatabaseConfig.initDataSource(DatabaseConfig.java:116)
+	at org.brightcare.server.config.DatabaseConfig.getDataSource(DatabaseConfig.java:44)
+	at org.brightcare.server.ServerMain.main(ServerMain.java:47)
+Caused by: java.sql.SQLException: No suitable driver
+	at java.sql/java.sql.DriverManager.getDriver(DriverManager.java:300)
+	at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:105)
+	... 7 common frames omitted
+2026-06-29 23:05:41.721 [main] INFO  org.brightcare.server.ServerMain - ============================================================
+2026-06-29 23:05:41.725 [main] INFO  org.brightcare.server.ServerMain -   BrightCare Medical Centre — RMI Server
+2026-06-29 23:05:41.726 [main] INFO  org.brightcare.server.ServerMain -   Starting up...
+2026-06-29 23:05:41.726 [main] INFO  org.brightcare.server.ServerMain - ============================================================
+2026-06-29 23:05:41.726 [main] INFO  org.brightcare.server.ServerMain - Initialising database connection pool...
+2026-06-29 23:05:41.732 [main] INFO  o.b.server.config.DatabaseConfig - HikariCP pool initialised — jdbcUrl=${DB_URL}jdbc:postgresql://localhost:5432/cms, maxPoolSize=10
+2026-06-29 23:05:41.748 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-06-29 23:05:41.781 [main] ERROR org.brightcare.server.ServerMain - Fatal error starting server
+java.lang.RuntimeException: Failed to get driver instance for jdbcUrl=${DB_URL}jdbc:postgresql://localhost:5432/cms
+	at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:113)
+	at com.zaxxer.hikari.pool.PoolBase.initializeDataSource(PoolBase.java:327)
+	at com.zaxxer.hikari.pool.PoolBase.<init>(PoolBase.java:113)
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:91)
+	at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:80)
+	at org.brightcare.server.config.DatabaseConfig.initDataSource(DatabaseConfig.java:116)
+	at org.brightcare.server.config.DatabaseConfig.getDataSource(DatabaseConfig.java:44)
+	at org.brightcare.server.ServerMain.main(ServerMain.java:47)
+Caused by: java.sql.SQLException: No suitable driver
+	at java.sql/java.sql.DriverManager.getDriver(DriverManager.java:300)
+	at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:105)
+	... 7 common frames omitted
+2026-06-29 23:05:51.099 [main] INFO  org.brightcare.server.ServerMain - ============================================================
+2026-06-29 23:05:51.100 [main] INFO  org.brightcare.server.ServerMain -   BrightCare Medical Centre — RMI Server
+2026-06-29 23:05:51.101 [main] INFO  org.brightcare.server.ServerMain -   Starting up...
+2026-06-29 23:05:51.101 [main] INFO  org.brightcare.server.ServerMain - ============================================================
+2026-06-29 23:05:51.101 [main] INFO  org.brightcare.server.ServerMain - Initialising database connection pool...
+2026-06-29 23:05:51.106 [main] INFO  o.b.server.config.DatabaseConfig - HikariCP pool initialised — jdbcUrl=${DB_URL}jdbc:postgresql://localhost:5432/cms, maxPoolSize=10
+2026-06-29 23:05:51.130 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-06-29 23:05:51.141 [main] ERROR org.brightcare.server.ServerMain - Fatal error starting server
+java.lang.RuntimeException: Failed to get driver instance for jdbcUrl=${DB_URL}jdbc:postgresql://localhost:5432/cms
+	at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:113)
+	at com.zaxxer.hikari.pool.PoolBase.initializeDataSource(PoolBase.java:327)
+	at com.zaxxer.hikari.pool.PoolBase.<init>(PoolBase.java:113)
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:91)
+	at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:80)
+	at org.brightcare.server.config.DatabaseConfig.initDataSource(DatabaseConfig.java:116)
+	at org.brightcare.server.config.DatabaseConfig.getDataSource(DatabaseConfig.java:44)
+	at org.brightcare.server.ServerMain.main(ServerMain.java:47)
+Caused by: java.sql.SQLException: No suitable driver
+	at java.sql/java.sql.DriverManager.getDriver(DriverManager.java:300)
+	at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:105)
+	... 7 common frames omitted
+2026-06-29 23:06:05.127 [main] INFO  org.brightcare.server.ServerMain - ============================================================
+2026-06-29 23:06:05.128 [main] INFO  org.brightcare.server.ServerMain -   BrightCare Medical Centre — RMI Server
+2026-06-29 23:06:05.128 [main] INFO  org.brightcare.server.ServerMain -   Starting up...
+2026-06-29 23:06:05.128 [main] INFO  org.brightcare.server.ServerMain - ============================================================
+2026-06-29 23:06:05.129 [main] INFO  org.brightcare.server.ServerMain - Initialising database connection pool...
+2026-06-29 23:06:05.137 [main] INFO  o.b.server.config.DatabaseConfig - HikariCP pool initialised — jdbcUrl=${DB_URL}, maxPoolSize=10
+2026-06-29 23:06:05.149 [main] INFO  com.zaxxer.hikari.HikariDataSource - HikariPool-1 - Starting...
+2026-06-29 23:06:05.159 [main] ERROR org.brightcare.server.ServerMain - Fatal error starting server
+java.lang.RuntimeException: Failed to get driver instance for jdbcUrl=${DB_URL}
+	at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:113)
+	at com.zaxxer.hikari.pool.PoolBase.initializeDataSource(PoolBase.java:327)
+	at com.zaxxer.hikari.pool.PoolBase.<init>(PoolBase.java:113)
+	at com.zaxxer.hikari.pool.HikariPool.<init>(HikariPool.java:91)
+	at com.zaxxer.hikari.HikariDataSource.<init>(HikariDataSource.java:80)
+	at org.brightcare.server.config.DatabaseConfig.initDataSource(DatabaseConfig.java:116)
+	at org.brightcare.server.config.DatabaseConfig.getDataSource(DatabaseConfig.java:44)
+	at org.brightcare.server.ServerMain.main(ServerMain.java:47)
+Caused by: java.sql.SQLException: No suitable driver
+	at java.sql/java.sql.DriverManager.getDriver(DriverManager.java:300)
+	at com.zaxxer.hikari.util.DriverDataSource.<init>(DriverDataSource.java:105)
+	... 7 common frames omitted

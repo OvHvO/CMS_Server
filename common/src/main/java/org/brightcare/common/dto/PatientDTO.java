@@ -19,5 +19,5 @@ public record PatientDTO(
         ZonedDateTime createdAt,
         ZonedDateTime updatedAt
 ) implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 5L;
 }
