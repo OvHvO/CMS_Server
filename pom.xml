@@ -60,7 +60,7 @@
 
         <!--GOOGLE AUTHENTICATOR-->
         <dependency>
-        <groupId>com.warrenstrange</groupId>
+            <groupId>com.warrenstrange</groupId>
             <artifactId>googleauth</artifactId>
             <version>1.5.0</version>
         </dependency>
@@ -83,7 +83,6 @@
             <artifactId>dotenv-java</artifactId>
             <version>3.2.0</version>
         </dependency>
-
     </dependencies>
 
     <build>
