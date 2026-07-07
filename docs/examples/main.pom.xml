@@ -16,7 +16,7 @@
 
     <modules>
         <module>CMS_Server/common</module>
-        <module>Clinic_Management_System/client</module>
+        <module>CMS_Client/client</module>
         <module>CMS_Server/server</module>
     </modules>
 
