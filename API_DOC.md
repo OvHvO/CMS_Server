@@ -10,18 +10,27 @@
 ## How to Connect
 
 ```java
+package org.brightcare.client; // Your FrontEnd Package
+
 import org.brightcare.common.ClinicService;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
 
 // 1. Get the registry
-Registry registry = LocateRegistry.getRegistry("localhost", 1099);
+Registry registry = LocateRegistry.getRegistry("localhost", 1099, new SslRMIClientSocketFactory());
 
 // 2. Look up the service
+// <b>NOTE:</b> Any new services please follow and add it by yourself.
 ClinicService service = (ClinicService) registry.lookup("ClinicService");
+AuthenticationService authenticationService = (AuthenticationService) registry.lookup("AuthenticationService");
 
 // 3. Call methods — every call can throw RemoteException
-UserDTO user = service.login("username", "password");
+UserDTO user = authenticationService.login(
+    ClientSession.getPendingUsername(), // ClientSession is a session manager that store the current data into the memory.
+    ClientSession.getPendingPassword(),
+    Integer.parseInt(codeText)
+);
 ```
 
 **Important:** Every method in this interface throws `java.rmi.RemoteException`.
@@ -52,20 +61,21 @@ All custom exceptions extend `java.lang.Exception` (checked).
 
 #### `login`
 ```
-UserDTO login(String username, String password)
-    throws AuthenticationException, RemoteException
+UserDTO login(String username, String password, int authenticationCode) 
+    throws RemoteException, AuthenticationException;
 ```
 
 | Parameter | Type | Description |
 |-----------|------|-------------|
 | `username` | `String` | User's unique login name |
 | `password` | `String` | Plain-text password |
+| `authenticationCode` | `integer` | User entered google authentication code |
 
 | Returns | Type | Description |
 |---------|------|-------------|
 | `user` | `UserDTO` | Contains `id` (UUID), `username`, `role` (enum), `createdAt` |
 
-**Throws:** `AuthenticationException` — invalid credentials
+**Throws:** `AuthenticationException` — invalid credentials `RemoteException` - Rmi server error
 
 ---
 
