@@ -12,7 +12,7 @@ public record AvailabilitySlotDTO(
         LocalTime endTime,
         boolean available
 ) implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 2L;
 
     @Override
     public String toString() {

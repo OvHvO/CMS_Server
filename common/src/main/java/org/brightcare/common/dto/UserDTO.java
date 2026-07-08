@@ -16,5 +16,5 @@ public record UserDTO(
         Role role,
         ZonedDateTime createdAt
 ) implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 7L;
 }
