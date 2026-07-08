@@ -18,5 +18,5 @@ public record ReportDTO(
         Map<String, Integer> appointmentsBySpecialization,
         List<AppointmentDTO> appointmentDetails
 ) implements Serializable {
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 6L;
 }

@@ -6,7 +6,7 @@ Please make sure your project is organized exactly as shown below.
 
 ```text
 root/
-├── Clinic_Management_System/
+├── CMS_Client/
 │   └── client/                 # Frontend project (includes pom.xml)
 ├── CMS_Server/
 │   ├── common/                 # Shared module (includes pom.xml)
@@ -38,7 +38,7 @@ After the build completes successfully, all required dependencies will be resolv
 
 The `pom.xml` files inside the following modules:
 
-- `Clinic_Management_System/client`
+- `CMS_Client/client`
 - `CMS_Server/common`
 - `CMS_Server/server`
 
@@ -54,7 +54,7 @@ The main `pom.xml` uses the `<modules>` section to include:
 
 - `CMS_Server/common`
 - `CMS_Server/server`
-- `Clinic_Management_System/client`
+- `CMS_Client/client`
 
 These module paths are also configured using **relative paths**. If the project structure changes, update the module paths accordingly.
 
