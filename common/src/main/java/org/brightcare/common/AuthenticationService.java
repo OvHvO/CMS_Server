@@ -5,6 +5,7 @@ import org.brightcare.common.dto.*;
 import java.rmi.Remote;
 import java.rmi.RemoteException;
 import java.util.UUID;
+import org.brightcare.common.exception.AuthenticationException;
 
 /**
  * RMI remote interface for authentication and session management.
@@ -38,12 +39,13 @@ public interface AuthenticationService extends Remote {
      *
      * @return UserDTO containing user id, username, and role; null if authentication fails
      */
-    UserDTO login(String username, String password, int authenticationCode) throws RemoteException;
+    UserDTO login(String username, String password, int authenticationCode) throws RemoteException, AuthenticationException;
 
     /**
      * Backwards-compatible password-only login is intentionally not sufficient
      * when Google Authenticator is enabled.
      */
+    @Deprecated
     UserDTO login(String username, String password) throws RemoteException;
 
     /**

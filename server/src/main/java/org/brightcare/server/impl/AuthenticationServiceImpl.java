@@ -194,11 +194,11 @@ public class AuthenticationServiceImpl implements AuthenticationService {
      * @throws RemoteException if database access fails or other system errors occur
      */
     @Override
-    public UserDTO login(String username, String password, int authenticationCode) throws RemoteException {
+    public UserDTO login(String username, String password, int authenticationCode) throws RemoteException, AuthenticationException {
         // Input validation
         if (username == null || username.isBlank() || password == null || password.isBlank()) {
             logger.warn("Login attempt with null or blank credentials for user: {}", username);
-            return null;
+            throw new AuthenticationException("Invalid username or password.");
         }
 
         UserDAO.UserRow user = findUserByUsername(username).orElse(null);
