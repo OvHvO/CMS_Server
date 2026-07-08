@@ -42,3 +42,5 @@ build/
 .env
 .env.local
 .env.*.local
+application.dev.properties
+application.properties
