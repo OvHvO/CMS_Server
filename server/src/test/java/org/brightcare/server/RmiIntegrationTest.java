@@ -21,8 +21,10 @@ import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.UUID;
 
-import static org.junit.jupiter.api.Assertions.*;
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
 
+import static org.junit.jupiter.api.Assertions.*;
 /**
  * RMI 集成测试 — 验证整个 RMI 通信流程能否跑通。
  * <p>
@@ -108,8 +110,8 @@ class RmiIntegrationTest {
             LocateRegistry.createRegistry(RMI_PORT);
         }
 
-        RmiUtil.exportAndBind("ClinicService", clinicImpl, RMI_PORT);
-        RmiUtil.exportAndBind("AuthenticationService", authImpl, RMI_PORT);
+        RmiUtil.exportAndBind("ClinicService", clinicImpl, RMI_PORT, new SslRMIClientSocketFactory(), new  SslRMIServerSocketFactory());
+        RmiUtil.exportAndBind("AuthenticationService", authImpl, RMI_PORT, new SslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
 
         // 4. 客户端查找 stub —— 这就是你要测试的核心流程
         System.out.println("[TEST] 客户端查找 RMI stubs...");
