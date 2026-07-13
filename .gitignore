@@ -46,3 +46,4 @@ application.dev.properties
 *.cer
 *.keystore
 application.properties
+logs/
