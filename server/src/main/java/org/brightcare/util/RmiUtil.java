@@ -4,9 +4,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.rmi.Remote;
+import java.rmi.RemoteException;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
-import java.rmi.server.UnicastRemoteObject;
+
+import javax.rmi.ssl.SslRMIClientSocketFactory;
+import javax.rmi.ssl.SslRMIServerSocketFactory;
+
+import java.rmi.server.*;
 
 /**
  * Utility class for RMI registry operations.
@@ -14,6 +19,7 @@ import java.rmi.server.UnicastRemoteObject;
 public final class RmiUtil {
 
     private static final Logger log = LoggerFactory.getLogger(RmiUtil.class);
+    private static Registry registry;
 
     /** Default RMI registry port. */
     public static final int DEFAULT_RMI_PORT = 1099;
@@ -29,17 +35,23 @@ public final class RmiUtil {
      * @return the Registry instance
      * @throws java.rmi.RemoteException if the registry cannot be created
      */
-    public static Registry createRegistry(int port) throws java.rmi.RemoteException {
-        try {
-            // Check if a registry already exists on this port
-            Registry existing = LocateRegistry.getRegistry(port);
-            existing.list(); // will throw if no registry is actually running
-            log.info("RMI registry already running on port {}", port);
-            return existing;
-        } catch (java.rmi.RemoteException e) {
-            log.info("Creating new RMI registry on port {}", port);
-            return LocateRegistry.createRegistry(port);
+    public static synchronized Registry createRegistry(int port) throws RemoteException {
+        if (registry != null) {
+            return registry;
         }
+
+        try {
+            registry = LocateRegistry.createRegistry(
+                port,
+                new SslRMIClientSocketFactory(),
+                new SslRMIServerSocketFactory()
+            );
+            log.info("Created new SSL RMI registry on port {}", port);
+        } catch (ExportException e) {
+            throw new RemoteException("Failed to create RMI registry", e);
+        }
+
+        return registry;
     }
 
     /**
@@ -53,14 +65,31 @@ public final class RmiUtil {
      * @throws java.rmi.RemoteException if export or binding fails
      */
     @SuppressWarnings("unchecked")
-    public static <T extends Remote> T exportAndBind(String name, T remoteObject, int port)
+    public static <T extends Remote> T exportAndBind(String name, T remoteObject, int port, RMIClientSocketFactory clientSocketFactory, RMIServerSocketFactory serverSocketFactory)
             throws java.rmi.RemoteException {
-        T stub = (T) UnicastRemoteObject.exportObject(remoteObject, 0);
+        T stub;
+        try {
+            stub = (T) UnicastRemoteObject.exportObject(remoteObject, 0, clientSocketFactory, serverSocketFactory);
+        } catch (java.rmi.server.ExportException ee) {
+            // If the object was already exported in this JVM, reuse the existing stub instead
+            log.warn("Export failed (object may already be exported): {}", ee.getMessage());
+            try {
+                stub = (T) UnicastRemoteObject.toStub(remoteObject);
+                log.info("Reusing existing stub for '{}'", name);
+            } catch (java.rmi.NoSuchObjectException nsoe) {
+                // If we cannot obtain a stub, rethrow a more descriptive exception
+                throw new java.rmi.RemoteException("Failed to export remote object and could not obtain existing stub", nsoe);
+            }
+        }
+
         Registry registry = createRegistry(port);
         registry.rebind(name, stub);
         log.info("Bound '{}' to RMI registry on port {}", name, port);
         return stub;
     }
+
+
+
 
     /**
      * Unexport a remote object, making it unavailable for incoming RMI calls.
