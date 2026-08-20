@@ -26,37 +26,37 @@ import javax.rmi.ssl.SslRMIServerSocketFactory;
 
 import static org.junit.jupiter.api.Assertions.*;
 /**
- * RMI 集成测试 — 验证整个 RMI 通信流程能否跑通。
+ * RMI integration test — verifies that the whole RMI communication flow works.
  * <p>
- * 测试模式（你想要的）：
+ * Test mode (as you requested):
  * <pre>{@code
  *   ClinicService stub = (ClinicService) Naming.lookup("rmi://localhost:11099/ClinicService");
  *   List<DoctorDTO> doctors = stub.getAllDoctors();
  *   assertNotNull(doctors);
  * }</pre>
  * <p>
- * <b>前提条件：</b>
+ * <b>Prerequisites:</b>
  * <ol>
- *   <li>PostgreSQL 数据库已运行</li>
- *   <li>src/main/resources/application.dev.properties 配置了正确的数据库连接</li>
- *   <li>seed_data.sql 已导入（提供测试用户、医生、患者数据）</li>
+ *   <li>PostgreSQL database must be running</li>
+ *   <li>src/main/resources/application.dev.properties must contain the correct database connection</li>
+ *   <li>seed_data.sql must be imported (provides test users, doctors, and patients)</li>
  * </ol>
  * <p>
- * <b>运行方式：</b>
+ * <b>How to run:</b>
  * <pre>mvn test -pl server</pre>
  * <p>
- * 这个测试只验证 RMI 通信链路——stub 查找、方法调用、返回值反序列化。
- * 不验证数据库业务逻辑的正确性。
+ * This test only verifies the RMI communication chain — stub lookup, method invocation,
+ * and deserialization of return values. It does not verify the correctness of database business logic.
  */
-@DisplayName("RMI 集成测试 — 验证 RMI 通信流程")
+@DisplayName("RMI Integration Test — verifies RMI communication flow")
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 class RmiIntegrationTest {
 
-    // 使用独立端口避免和已运行的 server 冲突
+    // Use an isolated port to avoid conflicts with a running server
     private static final int RMI_PORT = 11099;
     private static final String RMI_URL = "rmi://localhost:" + RMI_PORT + "/";
 
-    // ---------- Seed data UUIDs（来自 seed_data.sql）----------
+    // ---------- Seed data UUIDs (from seed_data.sql) ----------
     // Users
     private static final UUID USER_ADMIN       = UUID.fromString("a0000000-0000-0000-0000-000000000001");
     private static final UUID USER_RECEPTIONIST = UUID.fromString("a0000000-0000-0000-0000-000000000002");
@@ -74,36 +74,36 @@ class RmiIntegrationTest {
     // Appointments (scheduled, future)
     private static final UUID APPT_FUTURE_1    = UUID.fromString("ae000000-0000-0000-0000-000000000007");
 
-    // Shared test password (seed data 中所有用户的密码都是 password123)
+    // Shared test password (all users in seed data use password123)
     private static final String TEST_PASSWORD = "password123";
 
-    // ---------- RMI stubs（@BeforeAll 中初始化，@Test 中直接用）----------
+    // ---------- RMI stubs (initialized in @BeforeAll, used directly in @Test) ----------
     private static ClinicService clinicStub;
     private static AuthenticationService authStub;
 
     // =========================================================================
-    // 生命周期：启动 / 停止 RMI Server
+    // Lifecycle: start / stop RMI Server
     // =========================================================================
 
     @BeforeAll
     static void startRmiServer() throws Exception {
         System.out.println("========================================");
-        System.out.println("  [TEST] 启动 RMI Server (port=" + RMI_PORT + ")");
+        System.out.println("  [TEST] Starting RMI Server (port=" + RMI_PORT + ")");
         System.out.println("========================================");
 
-        // 1. 预热数据库连接池
-        System.out.println("[TEST] 初始化 HikariCP 连接池...");
+        // 1. Warm up the database connection pool
+        System.out.println("[TEST] Initializing HikariCP connection pool...");
         DatabaseConfig.getDataSource();
 
-        // 2. 创建远程对象
-        System.out.println("[TEST] 创建 ClinicServiceImpl & AuthenticationServiceImpl...");
+        // 2. Create the remote objects
+        System.out.println("[TEST] Creating ClinicServiceImpl & AuthenticationServiceImpl...");
         ClinicServiceImpl clinicImpl = new ClinicServiceImpl();
         AuthenticationServiceImpl authImpl = new AuthenticationServiceImpl();
 
-        // 3. 导出并绑定到 RMI registry
-        System.out.println("[TEST] 绑定到 RMI registry...");
+        // 3. Export and bind to the RMI registry
+        System.out.println("[TEST] Binding to RMI registry...");
 
-        // 确保 registry 已创建
+        // Ensure the registry has been created
         try {
             LocateRegistry.getRegistry(RMI_PORT).list();
         } catch (RemoteException e) {
@@ -113,498 +113,498 @@ class RmiIntegrationTest {
         RmiUtil.exportAndBind("ClinicService", clinicImpl, RMI_PORT, new SslRMIClientSocketFactory(), new  SslRMIServerSocketFactory());
         RmiUtil.exportAndBind("AuthenticationService", authImpl, RMI_PORT, new SslRMIClientSocketFactory(), new SslRMIServerSocketFactory());
 
-        // 4. 客户端查找 stub —— 这就是你要测试的核心流程
-        System.out.println("[TEST] 客户端查找 RMI stubs...");
+        // 4. Client-side stub lookup — this is the core flow you wanted to test
+        System.out.println("[TEST] Looking up RMI stubs on the client side...");
         clinicStub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
         authStub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
 
-        assertNotNull(clinicStub, "❌ 无法查找到 ClinicService RMI stub");
-        assertNotNull(authStub,  "❌ 无法查找到 AuthenticationService RMI stub");
+        assertNotNull(clinicStub, "Unable to find ClinicService RMI stub");
+        assertNotNull(authStub,  "Unable to find AuthenticationService RMI stub");
 
-        System.out.println("[TEST] ✅ RMI stubs 查找成功，服务器就绪");
+        System.out.println("[TEST] RMI stubs looked up successfully, server is ready");
     }
 
     @AfterAll
     static void stopRmiServer() {
-        System.out.println("[TEST] 清理：停止 RMI server...");
+        System.out.println("[TEST] Cleanup: stopping RMI server...");
         DatabaseConfig.shutdown();
-        System.out.println("[TEST] ✅ 清理完成");
+        System.out.println("[TEST] Cleanup complete");
     }
 
     // =========================================================================
-    // 0. 最基本的 RMI 连通性测试
+    // 0. Basic RMI connectivity test
     // =========================================================================
 
     @Test
     @Order(0)
-    @DisplayName("RMI 连通性：Naming.lookup 能否拿到 stub → 调用方法 → 拿到返回值")
+    @DisplayName("RMI connectivity: can Naming.lookup get a stub -> call a method -> get a return value")
     void rmiLookupAndCall_ShouldWork() throws Exception {
-        // 1. 查找 stub（网络通信在背后发生）
+        // 1. Look up the stub (network communication happens behind the scenes)
         ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
-        assertNotNull(stub, "Naming.lookup 返回 null，RMI 通信失败");
+        assertNotNull(stub, "Naming.lookup returned null, RMI communication failed");
 
-        // 2. 像调用本地方法一样调用（实际上网络通信在背后发生了）
+        // 2. Call it like a local method (actually, network communication happens behind the scenes)
         List<DoctorDTO> response = stub.getAllDoctors();
 
-        // 3. 验证拿到返回值
-        assertNotNull(response, "getAllDoctors() 返回 null，方法调用失败");
-        System.out.println("[TEST] ✅ RMI 调用成功，返回了 " + response.size() + " 位医生");
+        // 3. Verify the return value
+        assertNotNull(response, "getAllDoctors() returned null, method call failed");
+        System.out.println("[TEST] RMI call succeeded, returned " + response.size() + " doctors");
     }
 
     // =========================================================================
-    // 1. AuthenticationService RMI 测试
+    // 1. AuthenticationService RMI tests
     // =========================================================================
 
     @Nested
-    @DisplayName("AuthenticationService RMI 方法")
+    @DisplayName("AuthenticationService RMI methods")
     class AuthenticationServiceTests {
 
         @Test
-        @DisplayName("verifyCredentials — 正确密码 → 返回 true")
+        @DisplayName("verifyCredentials - correct password -> returns true")
         void verifyCredentials_ValidCredentials_ReturnsTrue() throws Exception {
-            // Naming.lookup 获得 stub
+            // Look up the stub via Naming.lookup
             AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
 
-            // 调用远程方法
+            // Call the remote method
             boolean result = stub.verifyCredentials("admin1", TEST_PASSWORD);
 
-            // 验证返回值
-            assertTrue(result, "正确密码应该返回 true");
-            System.out.println("[TEST] ✅ verifyCredentials('admin1', '***') = " + result);
+            // Verify the return value
+            assertTrue(result, "A correct password should return true");
+            System.out.println("[TEST] verifyCredentials('admin1', '***') = " + result);
         }
 
         @Test
-        @DisplayName("verifyCredentials — 错误密码 → 返回 false")
+        @DisplayName("verifyCredentials - wrong password -> returns false")
         void verifyCredentials_InvalidPassword_ReturnsFalse() throws Exception {
             AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
 
             boolean result = stub.verifyCredentials("admin1", "wrong_password");
 
-            assertFalse(result, "错误密码应该返回 false");
-            System.out.println("[TEST] ✅ verifyCredentials 错误密码返回 " + result);
+            assertFalse(result, "A wrong password should return false");
+            System.out.println("[TEST] verifyCredentials with wrong password returned " + result);
         }
 
         @Test
-        @DisplayName("verifyCredentials — 空用户名 → 不抛异常，返回 false")
+        @DisplayName("verifyCredentials - empty username -> no exception, returns false")
         void verifyCredentials_NullUsername_ReturnsFalse() throws Exception {
             AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
 
-            // 即使传 null，RMI 调用不应该崩溃
+            // Even when null is passed, the RMI call should not crash
             assertDoesNotThrow(() -> {
                 boolean result = stub.verifyCredentials("", "");
                 assertFalse(result);
-            }, "空凭证不应该导致 RemoteException");
-            System.out.println("[TEST] ✅ verifyCredentials 空凭证安全返回");
+            }, "Empty credentials should not cause a RemoteException");
+            System.out.println("[TEST] verifyCredentials returned safely with empty credentials");
         }
 
         @Test
-        @DisplayName("verifyCredentials — 不存在的用户 → 返回 false")
+        @DisplayName("verifyCredentials - non-existent user -> returns false")
         void verifyCredentials_NonExistentUser_ReturnsFalse() throws Exception {
             AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
 
             boolean result = stub.verifyCredentials("nonexistent_user_999", "whatever");
 
             assertFalse(result);
-            System.out.println("[TEST] ✅ verifyCredentials 不存在用户返回 false");
+            System.out.println("[TEST] verifyCredentials with non-existent user returned false");
         }
 
         @Test
-        @DisplayName("hasAuthenticatorSecret — 未设置 2FA 的用户 → 返回 false")
+        @DisplayName("hasAuthenticatorSecret - user without 2FA -> returns false")
         void hasAuthenticatorSecret_NoSecret_ReturnsFalse() throws Exception {
             AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
 
             boolean result = stub.hasAuthenticatorSecret("admin1", TEST_PASSWORD);
 
-            // Seed data 中 admin1 的 auth_secretKey 是 NULL
-            assertFalse(result, "未设置 2FA 应该返回 false");
-            System.out.println("[TEST] ✅ hasAuthenticatorSecret = " + result);
+            // In seed data, admin1's auth_secretKey is NULL
+            assertFalse(result, "Users without 2FA should return false");
+            System.out.println("[TEST] hasAuthenticatorSecret = " + result);
         }
 
         @Test
-        @DisplayName("createAuthenticatorQrCode — 有效凭证 → 返回 PNG 字节数组")
+        @DisplayName("createAuthenticatorQrCode - valid credentials -> returns PNG byte array")
         void createAuthenticatorQrCode_ValidCredentials_ReturnsPngBytes() throws Exception {
             AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
 
             byte[] qrPng = stub.createAuthenticatorQrCode("admin1", TEST_PASSWORD);
 
-            assertNotNull(qrPng, "二维码 PNG 数据不应为 null");
-            assertTrue(qrPng.length > 0, "二维码数据不应为空");
-            System.out.println("[TEST] ✅ createAuthenticatorQrCode 返回了 " + qrPng.length + " 字节的 PNG");
+            assertNotNull(qrPng, "QR code PNG data should not be null");
+            assertTrue(qrPng.length > 0, "QR code data should not be empty");
+            System.out.println("[TEST] createAuthenticatorQrCode returned " + qrPng.length + " bytes of PNG");
         }
 
         @Test
-        @DisplayName("login(username, password, code) — 2FA 未设置时 → 不抛 RemoteException")
+        @DisplayName("login(username, password, code) - when 2FA is not set -> no RemoteException")
         void login_With2FA_NoSecret_ReturnsNullGracefully() throws Exception {
             AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
 
-            // 因为 seed user 没有 2FA secret，login 应该返回 null 而不是抛异常
+            // Because the seed user has no 2FA secret, login should return null instead of throwing
             UserDTO result = stub.login("admin1", TEST_PASSWORD, 123456);
 
-            // 没有 2FA secret → 返回 null（不会让 RMI 通信崩溃）
-            assertNull(result, "无 2FA secret 时 login 应返回 null");
-            System.out.println("[TEST] ✅ login 无 2FA 时安全返回 null");
+            // No 2FA secret -> returns null (does not crash RMI communication)
+            assertNull(result, "login should return null when there is no 2FA secret");
+            System.out.println("[TEST] login returned null safely without 2FA");
         }
 
         @Test
-        @DisplayName("login(username, password) — 无 2FA 强制登录 → 抛出 RemoteException")
+        @DisplayName("login(username, password) - forced login without 2FA -> throws RemoteException")
         void login_Without2FA_ThrowsRemoteException() throws Exception {
             AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
 
-            // 该方法永远会抛出 RemoteException（因为 2FA 是强制的）
+            // This method always throws RemoteException (because 2FA is mandatory)
             assertThrows(RemoteException.class, () -> {
                 stub.login("admin1", TEST_PASSWORD);
-            }, "无 TOTP 码的 login 应该抛出 RemoteException");
-            System.out.println("[TEST] ✅ login 无 2FA 正确抛出了 RemoteException");
+            }, "login without a TOTP code should throw RemoteException");
+            System.out.println("[TEST] login correctly threw RemoteException without 2FA");
         }
 
         @Test
-        @DisplayName("logout — 应该不抛异常")
+        @DisplayName("logout - should not throw")
         void logout_ShouldNotThrow() throws Exception {
             AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
 
             assertDoesNotThrow(() -> stub.logout(USER_ADMIN));
-            System.out.println("[TEST] ✅ logout 执行成功");
+            System.out.println("[TEST] logout executed successfully");
         }
 
         @Test
-        @DisplayName("logout — null userId → 不抛异常")
+        @DisplayName("logout - null userId -> no exception")
         void logout_NullUserId_ShouldNotThrow() throws Exception {
             AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
 
             assertDoesNotThrow(() -> stub.logout(null));
-            System.out.println("[TEST] ✅ logout(null) 安全返回");
+            System.out.println("[TEST] logout(null) returned safely");
         }
     }
 
     // =========================================================================
-    // 2. ClinicService RMI 测试
+    // 2. ClinicService RMI tests
     // =========================================================================
 
     @Nested
-    @DisplayName("ClinicService RMI 方法")
+    @DisplayName("ClinicService RMI methods")
     class ClinicServiceTests {
 
-        // ---- 认证 ----
+        // ---- Authentication ----
 
         @Test
-        @DisplayName("login — 正确凭证 → 返回 UserDTO")
+        @DisplayName("login - valid credentials -> returns UserDTO")
         void login_ValidCredentials_ReturnsUserDTO() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             UserDTO user = stub.login("admin1", TEST_PASSWORD);
 
-            assertNotNull(user, "UserDTO 不应为 null");
-            assertNotNull(user.id(), "用户 ID 不应为 null");
-            assertEquals("admin1", user.username(), "用户名应该匹配");
-            System.out.println("[TEST] ✅ login 返回: " + user.username() + " / " + user.role());
+            assertNotNull(user, "UserDTO should not be null");
+            assertNotNull(user.id(), "User ID should not be null");
+            assertEquals("admin1", user.username(), "The username should match");
+            System.out.println("[TEST] login returned: " + user.username() + " / " + user.role());
         }
 
         @Test
-        @DisplayName("login — 错误密码 → 抛出 AuthenticationException")
+        @DisplayName("login - wrong password -> throws AuthenticationException")
         void login_InvalidCredentials_ThrowsAuthenticationException() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             assertThrows(AuthenticationException.class, () -> {
                 stub.login("admin1", "wrong_password");
-            }, "错误凭证应该抛出 AuthenticationException");
-            System.out.println("[TEST] ✅ 错误凭证正确抛出了 AuthenticationException");
+            }, "Wrong credentials should throw AuthenticationException");
+            System.out.println("[TEST] Wrong credentials correctly threw AuthenticationException");
         }
 
         @Test
-        @DisplayName("login — 空凭证 → 抛出 AuthenticationException")
+        @DisplayName("login - empty credentials -> throws AuthenticationException")
         void login_BlankCredentials_ThrowsAuthenticationException() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             assertThrows(AuthenticationException.class, () -> {
                 stub.login("", "");
-            }, "空凭证应该抛出 AuthenticationException");
-            System.out.println("[TEST] ✅ 空凭证正确抛出了 AuthenticationException");
+            }, "Empty credentials should throw AuthenticationException");
+            System.out.println("[TEST] Empty credentials correctly threw AuthenticationException");
         }
 
         @Test
-        @DisplayName("login — 不存在用户 → 抛出 AuthenticationException")
+        @DisplayName("login - non-existent user -> throws AuthenticationException")
         void login_NonExistentUser_ThrowsAuthenticationException() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             assertThrows(AuthenticationException.class, () -> {
                 stub.login("ghost_user", "whatever");
-            }, "不存在的用户应该抛出 AuthenticationException");
-            System.out.println("[TEST] ✅ 不存在用户正确抛出了 AuthenticationException");
+            }, "A non-existent user should throw AuthenticationException");
+            System.out.println("[TEST] Non-existent user correctly threw AuthenticationException");
         }
 
-        // ---- 查询 ----
+        // ---- Queries ----
 
         @Test
-        @DisplayName("getAllDoctors — 返回所有活跃医生")
+        @DisplayName("getAllDoctors - returns all active doctors")
         void getAllDoctors_ReturnsNonEmptyList() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             List<DoctorDTO> doctors = stub.getAllDoctors();
 
-            assertNotNull(doctors, "医生列表不应为 null");
-            assertFalse(doctors.isEmpty(), "应该至少有 1 位医生（seed data 有 3 位）");
-            // 验证 RMI 返回的 DTO 数据完整
+            assertNotNull(doctors, "The doctor list should not be null");
+            assertFalse(doctors.isEmpty(), "There should be at least 1 doctor (seed data has 3)");
+            // Verify the DTO data returned over RMI is complete
             DoctorDTO first = doctors.get(0);
-            assertNotNull(first.id(), "医生 ID 不应为 null");
-            assertNotNull(first.fullName(), "医生姓名不应为 null");
-            assertNotNull(first.specialization(), "医生专科不应为 null");
-            System.out.println("[TEST] ✅ getAllDoctors 返回了 " + doctors.size() + " 位医生: " +
+            assertNotNull(first.id(), "Doctor ID should not be null");
+            assertNotNull(first.fullName(), "Doctor name should not be null");
+            assertNotNull(first.specialization(), "Doctor specialization should not be null");
+            System.out.println("[TEST] getAllDoctors returned " + doctors.size() + " doctors: " +
                     first.fullName() + " (" + first.specialization() + ")");
         }
 
         @Test
-        @DisplayName("getDoctorByUserId — 有效 user ID → 返回 DoctorDTO")
+        @DisplayName("getDoctorByUserId - valid user ID -> returns DoctorDTO")
         void getDoctorByUserId_ValidId_ReturnsDoctorDTO() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             DoctorDTO doctor = stub.getDoctorByUserId(USER_DOCTOR_SARAH);
 
-            assertNotNull(doctor, "DoctorDTO 不应为 null");
-            assertTrue(doctor.fullName().contains("Sarah"), "姓名应该包含 Sarah");
-            System.out.println("[TEST] ✅ getDoctorByUserId 返回: " + doctor.fullName());
+            assertNotNull(doctor, "DoctorDTO should not be null");
+            assertTrue(doctor.fullName().contains("Sarah"), "The name should contain Sarah");
+            System.out.println("[TEST] getDoctorByUserId returned: " + doctor.fullName());
         }
 
         @Test
-        @DisplayName("getDoctorByUserId — 不存在的 ID → 抛出 NotFoundException")
+        @DisplayName("getDoctorByUserId - non-existent ID -> throws NotFoundException")
         void getDoctorByUserId_InvalidId_ThrowsNotFoundException() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             assertThrows(NotFoundException.class, () -> {
                 stub.getDoctorByUserId(UUID.randomUUID());
-            }, "不存在的 user ID 应该抛出 NotFoundException");
-            System.out.println("[TEST] ✅ 不存在医生正确抛出了 NotFoundException");
+            }, "A non-existent user ID should throw NotFoundException");
+            System.out.println("[TEST] Non-existent doctor correctly threw NotFoundException");
         }
 
         @Test
-        @DisplayName("getPatientByUserId — 有效 user ID → 返回 PatientDTO")
+        @DisplayName("getPatientByUserId - valid user ID -> returns PatientDTO")
         void getPatientByUserId_ValidId_ReturnsPatientDTO() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             PatientDTO patient = stub.getPatientByUserId(USER_PATIENT_JOHN);
 
-            assertNotNull(patient, "PatientDTO 不应为 null");
-            assertTrue(patient.firstName().contains("John"), "名字应该包含 John");
-            System.out.println("[TEST] ✅ getPatientByUserId 返回: " + patient.firstName() + " " + patient.lastName());
+            assertNotNull(patient, "PatientDTO should not be null");
+            assertTrue(patient.firstName().contains("John"), "The first name should contain John");
+            System.out.println("[TEST] getPatientByUserId returned: " + patient.firstName() + " " + patient.lastName());
         }
 
-        // ---- 预约 ----
+        // ---- Appointments ----
 
         @Test
-        @DisplayName("getDoctorAvailability — 返回 30 分钟槽位列表")
+        @DisplayName("getDoctorAvailability - returns a list of 30-minute slots")
         void getDoctorAvailability_ReturnsSlotList() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
-            // 查询远未来的日期（确保没有被预约）
+            // Query a far-future date (ensures no appointments have been booked)
             List<AvailabilitySlotDTO> slots = stub.getDoctorAvailability(
                     DOCTOR_SARAH, LocalDate.of(2027, 1, 15));
 
-            assertNotNull(slots, "槽位列表不应为 null");
-            assertFalse(slots.isEmpty(), "营业时间内应该有槽位（8:00-17:00 = 18 个槽位）");
-            // 因为是远未来，所有槽位都应该是可用的
+            assertNotNull(slots, "The slot list should not be null");
+            assertFalse(slots.isEmpty(), "There should be slots during business hours (8:00-17:00 = 18 slots)");
+            // Since it is far in the future, all slots should be available
             long availableCount = slots.stream().filter(AvailabilitySlotDTO::available).count();
-            System.out.println("[TEST] ✅ getDoctorAvailability 返回 " + slots.size() +
-                    " 个槽位, " + availableCount + " 个可用");
+            System.out.println("[TEST] getDoctorAvailability returned " + slots.size() +
+                    " slots, " + availableCount + " available");
         }
 
         @Test
-        @DisplayName("getDoctorAvailability — 不存在的医生 → 抛出 NotFoundException")
+        @DisplayName("getDoctorAvailability - non-existent doctor -> throws NotFoundException")
         void getDoctorAvailability_InvalidDoctor_ThrowsNotFoundException() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             assertThrows(NotFoundException.class, () -> {
                 stub.getDoctorAvailability(UUID.randomUUID(), LocalDate.now());
-            }, "不存在的医生应该抛出 NotFoundException");
-            System.out.println("[TEST] ✅ 不存在医生正确抛出了 NotFoundException");
+            }, "A non-existent doctor should throw NotFoundException");
+            System.out.println("[TEST] Non-existent doctor correctly threw NotFoundException");
         }
 
         @Test
-        @DisplayName("bookAppointment — 有效数据 → 返回 AppointmentDTO（RMI 往返成功）")
+        @DisplayName("bookAppointment - valid data -> returns AppointmentDTO (RMI round trip succeeds)")
         void bookAppointment_ValidData_ReturnsAppointmentDTO() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
-            // 预约一个远未来的时间，避免冲突
+            // Book a far-future time to avoid conflicts
             ZonedDateTime futureTime = ZonedDateTime.of(
                     2027, 6, 15, 10, 0, 0, 0, ZoneOffset.UTC);
 
             AppointmentDTO appt = stub.bookAppointment(
-                    PATIENT_JOHN, DOCTOR_MICHAEL, futureTime, "RMI 集成测试 — 常规体检");
+                    PATIENT_JOHN, DOCTOR_MICHAEL, futureTime, "RMI integration test - routine checkup");
 
-            assertNotNull(appt, "AppointmentDTO 不应为 null");
-            assertNotNull(appt.id(), "预约 ID 不应为 null");
+            assertNotNull(appt, "AppointmentDTO should not be null");
+            assertNotNull(appt.id(), "Appointment ID should not be null");
             assertEquals(PATIENT_JOHN, appt.patientId());
             assertEquals(DOCTOR_MICHAEL, appt.doctorId());
-            System.out.println("[TEST] ✅ bookAppointment 返回: appointmentId=" + appt.id() +
+            System.out.println("[TEST] bookAppointment returned: appointmentId=" + appt.id() +
                     ", status=" + appt.status());
 
-            // 清理：取消刚创建的预约
+            // Cleanup: cancel the appointment just created
             stub.cancelAppointment(appt.id());
         }
 
         @Test
-        @DisplayName("bookAppointment — 过去的时间 → 抛出 RemoteException")
+        @DisplayName("bookAppointment - a time in the past -> throws RemoteException")
         void bookAppointment_PastTime_ThrowsException() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             ZonedDateTime pastTime = ZonedDateTime.of(2020, 1, 1, 10, 0, 0, 0, ZoneOffset.UTC);
 
-            // 过去的时间 → InvalidDataException 会被包装成 RemoteException
+            // A time in the past -> InvalidDataException gets wrapped as RemoteException
             assertThrows(Exception.class, () -> {
-                stub.bookAppointment(PATIENT_JOHN, DOCTOR_SARAH, pastTime, "测试");
-            }, "过去的时间应该抛异常");
-            System.out.println("[TEST] ✅ 过去的时间预约正确抛出了异常");
+                stub.bookAppointment(PATIENT_JOHN, DOCTOR_SARAH, pastTime, "test");
+            }, "A time in the past should throw an exception");
+            System.out.println("[TEST] Booking a time in the past correctly threw an exception");
         }
 
         @Test
-        @DisplayName("bookAppointment — 不存在患者 → 抛出 NotFoundException")
+        @DisplayName("bookAppointment - non-existent patient -> throws NotFoundException")
         void bookAppointment_InvalidPatient_ThrowsNotFoundException() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             ZonedDateTime futureTime = ZonedDateTime.of(2027, 8, 1, 10, 0, 0, 0, ZoneOffset.UTC);
 
             assertThrows(NotFoundException.class, () -> {
-                stub.bookAppointment(UUID.randomUUID(), DOCTOR_SARAH, futureTime, "测试");
-            }, "不存在的患者应该抛出 NotFoundException");
-            System.out.println("[TEST] ✅ 不存在患者正确抛出了 NotFoundException");
+                stub.bookAppointment(UUID.randomUUID(), DOCTOR_SARAH, futureTime, "test");
+            }, "A non-existent patient should throw NotFoundException");
+            System.out.println("[TEST] Non-existent patient correctly threw NotFoundException");
         }
 
         @Test
-        @DisplayName("cancelAppointment — SCHEDULED 预约 → 不抛异常")
+        @DisplayName("cancelAppointment - SCHEDULED appointment -> no exception")
         void cancelAppointment_Scheduled_ShouldNotThrow() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
-            // 先创建一个预约
+            // First create an appointment
             ZonedDateTime futureTime = ZonedDateTime.of(
                     2027, 9, 10, 14, 0, 0, 0, ZoneOffset.UTC);
             AppointmentDTO appt = stub.bookAppointment(
-                    PATIENT_JANE, DOCTOR_MICHAEL, futureTime, "测试取消功能");
+                    PATIENT_JANE, DOCTOR_MICHAEL, futureTime, "test cancellation feature");
 
-            // 取消它
+            // Cancel it
             assertDoesNotThrow(() -> stub.cancelAppointment(appt.id()));
-            System.out.println("[TEST] ✅ cancelAppointment 执行成功: " + appt.id());
+            System.out.println("[TEST] cancelAppointment executed successfully: " + appt.id());
         }
 
         @Test
-        @DisplayName("cancelAppointment — 不存在的预约 ID → 抛出 NotFoundException")
+        @DisplayName("cancelAppointment - non-existent appointment ID -> throws NotFoundException")
         void cancelAppointment_InvalidId_ThrowsNotFoundException() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             assertThrows(NotFoundException.class, () -> {
                 stub.cancelAppointment(UUID.randomUUID());
-            }, "不存在的预约应该抛出 NotFoundException");
-            System.out.println("[TEST] ✅ 不存在预约正确抛出了 NotFoundException");
+            }, "A non-existent appointment should throw NotFoundException");
+            System.out.println("[TEST] Non-existent appointment correctly threw NotFoundException");
         }
 
         @Test
-        @DisplayName("getPatientAppointments — 有效患者 → 返回预约列表")
+        @DisplayName("getPatientAppointments - valid patient -> returns appointment list")
         void getPatientAppointments_ValidPatient_ReturnsList() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             List<AppointmentDTO> appointments = stub.getPatientAppointments(PATIENT_JOHN);
 
-            assertNotNull(appointments, "预约列表不应为 null");
-            System.out.println("[TEST] ✅ getPatientAppointments 返回了 " +
-                    appointments.size() + " 条预约记录");
+            assertNotNull(appointments, "The appointment list should not be null");
+            System.out.println("[TEST] getPatientAppointments returned " +
+                    appointments.size() + " appointments");
         }
 
         @Test
-        @DisplayName("getDoctorAppointments — 有效医生 → 返回预约列表")
+        @DisplayName("getDoctorAppointments - valid doctor -> returns appointment list")
         void getDoctorAppointments_ValidDoctor_ReturnsList() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             List<AppointmentDTO> appointments = stub.getDoctorAppointments(DOCTOR_SARAH);
 
-            assertNotNull(appointments, "预约列表不应为 null");
-            System.out.println("[TEST] ✅ getDoctorAppointments 返回了 " +
-                    appointments.size() + " 条预约记录");
+            assertNotNull(appointments, "The appointment list should not be null");
+            System.out.println("[TEST] getDoctorAppointments returned " +
+                    appointments.size() + " appointments");
         }
 
-        // ---- 医疗记录 ----
+        // ---- Medical records ----
 
         @Test
-        @DisplayName("getPatientMedicalHistory — 有效患者 → 返回病史列表")
+        @DisplayName("getPatientMedicalHistory - valid patient -> returns medical history list")
         void getPatientMedicalHistory_ValidPatient_ReturnsList() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             List<MedicalRecordDTO> records = stub.getPatientMedicalHistory(PATIENT_JOHN);
 
-            assertNotNull(records, "病史列表不应为 null");
-            System.out.println("[TEST] ✅ getPatientMedicalHistory 返回了 " +
-                    records.size() + " 条医疗记录");
+            assertNotNull(records, "The medical history list should not be null");
+            System.out.println("[TEST] getPatientMedicalHistory returned " +
+                    records.size() + " medical records");
         }
 
-        // ---- 报告 ----
+        // ---- Reports ----
 
         @Test
-        @DisplayName("generateMonthlyReport — 有效月份 → 返回 ReportDTO")
+        @DisplayName("generateMonthlyReport - valid month -> returns ReportDTO")
         void generateMonthlyReport_ValidMonth_ReturnsReportDTO() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             ReportDTO report = stub.generateMonthlyReport(2026, 6);
 
-            assertNotNull(report, "ReportDTO 不应为 null");
-            assertNotNull(report.title(), "报告标题不应为 null");
-            assertTrue(report.totalAppointments() >= 0, "总数应该 >= 0");
-            System.out.println("[TEST] ✅ generateMonthlyReport: " + report.title() +
-                    " — total=" + report.totalAppointments() +
+            assertNotNull(report, "ReportDTO should not be null");
+            assertNotNull(report.title(), "The report title should not be null");
+            assertTrue(report.totalAppointments() >= 0, "The total should be >= 0");
+            System.out.println("[TEST] generateMonthlyReport: " + report.title() +
+                    " - total=" + report.totalAppointments() +
                     ", completed=" + report.completedAppointments() +
                     ", cancelled=" + report.cancelledAppointments() +
                     ", noShow=" + report.noShowAppointments());
         }
 
         @Test
-        @DisplayName("generateMonthlyReport — 无效月份 → 抛出 RemoteException")
+        @DisplayName("generateMonthlyReport - invalid month -> throws RemoteException")
         void generateMonthlyReport_InvalidMonth_ThrowsException() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             assertThrows(Exception.class, () -> {
-                stub.generateMonthlyReport(2026, 13); // 月份 13 无效
-            }, "无效月份应该抛异常");
-            System.out.println("[TEST] ✅ 无效月份正确抛出了异常");
+                stub.generateMonthlyReport(2026, 13); // month 13 is invalid
+            }, "An invalid month should throw an exception");
+            System.out.println("[TEST] Invalid month correctly threw an exception");
         }
 
         @Test
-        @DisplayName("generateDoctorConsultationReport — 有效医生 → 返回 ReportDTO")
+        @DisplayName("generateDoctorConsultationReport - valid doctor -> returns ReportDTO")
         void generateDoctorConsultationReport_ValidDoctor_ReturnsReportDTO() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
             ReportDTO report = stub.generateDoctorConsultationReport(DOCTOR_SARAH);
 
-            assertNotNull(report, "ReportDTO 不应为 null");
-            assertNotNull(report.title(), "报告标题不应为 null");
-            System.out.println("[TEST] ✅ generateDoctorConsultationReport: " + report.title() +
-                    " — total=" + report.totalAppointments());
+            assertNotNull(report, "ReportDTO should not be null");
+            assertNotNull(report.title(), "The report title should not be null");
+            System.out.println("[TEST] generateDoctorConsultationReport: " + report.title() +
+                    " - total=" + report.totalAppointments());
         }
 
-        // ---- 患者管理 ----
+        // ---- Patient management ----
 
         @Test
-        @DisplayName("updatePatientInfo — 有效数据 → 返回更新后的 PatientDTO")
+        @DisplayName("updatePatientInfo - valid data -> returns the updated PatientDTO")
         void updatePatientInfo_ValidData_ReturnsUpdatedPatientDTO() throws Exception {
             ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
 
-            // 先获取当前患者信息
+            // First get the current patient information
             PatientDTO current = stub.getPatientByUserId(USER_PATIENT_JOHN);
 
-            // 更新联系电话
+            // Update the contact number
             PatientDTO updated = stub.updatePatientInfo(new PatientDTO(
                     current.id(),
                     current.userId(),
                     current.firstName(),
                     current.lastName(),
                     current.icPassportNumber(),
-                    "+60-00-0000000",  // 新电话号码
+                    "+60-00-0000000",  // new phone number
                     current.medicalRecordId(),
                     current.createdAt(),
                     current.updatedAt()
             ));
 
-            assertNotNull(updated, "更新后的 PatientDTO 不应为 null");
-            assertEquals("+60-00-0000000", updated.contactNumber(), "电话号码应该已更新");
-            System.out.println("[TEST] ✅ updatePatientInfo 成功: " +
+            assertNotNull(updated, "The updated PatientDTO should not be null");
+            assertEquals("+60-00-0000000", updated.contactNumber(), "The phone number should be updated");
+            System.out.println("[TEST] updatePatientInfo succeeded: " +
                     updated.firstName() + " " + updated.lastName() +
                     " phone=" + updated.contactNumber());
 
-            // 还原原始电话号码
+            // Restore the original phone number
             stub.updatePatientInfo(new PatientDTO(
                     current.id(), current.userId(),
                     current.firstName(), current.lastName(),
