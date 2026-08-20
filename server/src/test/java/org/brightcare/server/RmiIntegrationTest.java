@@ -258,6 +258,52 @@ class RmiIntegrationTest {
         }
 
         @Test
+        @DisplayName("login - valid credentials -> returns UserDTO")
+        void login_ValidCredentials_ReturnsUserDTO() throws Exception {
+            AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
+
+            UserDTO user = stub.login("admin1", TEST_PASSWORD, 123456);
+
+            assertNotNull(user, "UserDTO should not be null");
+            assertNotNull(user.id(), "User ID should not be null");
+            assertEquals("admin1", user.username(), "The username should match");
+            System.out.println("[TEST] login returned: " + user.username() + " / " + user.role());
+        }
+
+        @Test
+        @DisplayName("login - wrong password -> throws AuthenticationException")
+        void login_InvalidCredentials_ThrowsAuthenticationException() throws Exception {
+            AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
+
+            assertThrows(AuthenticationException.class, () -> {
+                stub.login("admin1", "wrong_password", 123456);
+            }, "Wrong credentials should throw AuthenticationException");
+            System.out.println("[TEST] Wrong credentials correctly threw AuthenticationException");
+        }
+
+        @Test
+        @DisplayName("login - empty credentials -> throws AuthenticationException")
+        void login_BlankCredentials_ThrowsAuthenticationException() throws Exception {
+            AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
+
+            assertThrows(AuthenticationException.class, () -> {
+                stub.login("", "", 123456);
+            }, "Empty credentials should throw AuthenticationException");
+            System.out.println("[TEST] Empty credentials correctly threw AuthenticationException");
+        }
+
+        @Test
+        @DisplayName("login - non-existent user -> throws AuthenticationException")
+        void login_NonExistentUser_ThrowsAuthenticationException() throws Exception {
+            AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
+
+            assertThrows(AuthenticationException.class, () -> {
+                stub.login("ghost_user", "whatever", 123456);
+            }, "A non-existent user should throw AuthenticationException");
+            System.out.println("[TEST] Non-existent user correctly threw AuthenticationException");
+        }
+
+        @Test
         @DisplayName("logout - should not throw")
         void logout_ShouldNotThrow() throws Exception {
             AuthenticationService stub = (AuthenticationService) Naming.lookup(RMI_URL + "AuthenticationService");
@@ -284,53 +330,7 @@ class RmiIntegrationTest {
     @DisplayName("ClinicService RMI methods")
     class ClinicServiceTests {
 
-        // ---- Authentication ----
 
-        @Test
-        @DisplayName("login - valid credentials -> returns UserDTO")
-        void login_ValidCredentials_ReturnsUserDTO() throws Exception {
-            ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
-
-            UserDTO user = stub.login("admin1", TEST_PASSWORD);
-
-            assertNotNull(user, "UserDTO should not be null");
-            assertNotNull(user.id(), "User ID should not be null");
-            assertEquals("admin1", user.username(), "The username should match");
-            System.out.println("[TEST] login returned: " + user.username() + " / " + user.role());
-        }
-
-        @Test
-        @DisplayName("login - wrong password -> throws AuthenticationException")
-        void login_InvalidCredentials_ThrowsAuthenticationException() throws Exception {
-            ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
-
-            assertThrows(AuthenticationException.class, () -> {
-                stub.login("admin1", "wrong_password");
-            }, "Wrong credentials should throw AuthenticationException");
-            System.out.println("[TEST] Wrong credentials correctly threw AuthenticationException");
-        }
-
-        @Test
-        @DisplayName("login - empty credentials -> throws AuthenticationException")
-        void login_BlankCredentials_ThrowsAuthenticationException() throws Exception {
-            ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
-
-            assertThrows(AuthenticationException.class, () -> {
-                stub.login("", "");
-            }, "Empty credentials should throw AuthenticationException");
-            System.out.println("[TEST] Empty credentials correctly threw AuthenticationException");
-        }
-
-        @Test
-        @DisplayName("login - non-existent user -> throws AuthenticationException")
-        void login_NonExistentUser_ThrowsAuthenticationException() throws Exception {
-            ClinicService stub = (ClinicService) Naming.lookup(RMI_URL + "ClinicService");
-
-            assertThrows(AuthenticationException.class, () -> {
-                stub.login("ghost_user", "whatever");
-            }, "A non-existent user should throw AuthenticationException");
-            System.out.println("[TEST] Non-existent user correctly threw AuthenticationException");
-        }
 
         // ---- Queries ----
 
